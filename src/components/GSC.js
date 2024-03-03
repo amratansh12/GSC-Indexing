@@ -9,26 +9,23 @@ export const GSC = () => {
   const onSuccess = (res) => {
     console.log("Success: ", res);
     setToken(res.accessToken);
-
   }
 
-  const execute = async () => {
-    try{
-      const res = await fetch("https://searchconsole.googleapis.com/webmasters/v3/sites", {
-        method: "GET",
-        headers: {
-          "Authorization": `Bearer ${token}`
-        }
-      })
-      const data = res.json();
-
+  const execute = () => {
+    fetch("https://searchconsole.googleapis.com/webmasters/v3/sites", {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
       setSites(data);
       console.log(data);
-    } catch(error) {
-      console.log(error);
-    }
+    })
+    .catch(console.log)
   }
-  
+
   const onFailure = (res) => {
     console.log("Error: ", res)
   }
