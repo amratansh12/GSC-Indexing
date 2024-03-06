@@ -1,18 +1,22 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Typography, TextField, Button, Paper, IconButton } from '@mui/material';
 import { Delete, CheckCircle } from '@mui/icons-material';
 import { useEffect } from 'react';
 import axios from 'axios'
 import { useParams, useSearchParams } from "react-router-dom";
 import { Buffer } from 'buffer';
+import { SitesContext } from "../context/SitesContext";
 
 
 const QuickDexing = () => {
+    const {sites} = useContext(SitesContext);
     const [searchParams] = useSearchParams();
     console.log(searchParams)
-
+    
     const code = searchParams.get("code");
     console.log(code)
+    const [sitemaps, setSitemaps] = useState({});
+    const [selectedSite, setSelectedSite] = useState("");
     const [name, setName] = useState("New User");
     const [email, setEmail] = useState("");
     const [website, setWebsite] = useState('');
@@ -22,16 +26,12 @@ const QuickDexing = () => {
     useEffect(() => {
 
         if (localStorage.getItem("name")) {
-
             const nameParam = localStorage.getItem("name");
             const emailParam = localStorage.getItem("email")
             setName(nameParam || "New User");
             setEmail(emailParam || "");
-
         }
         else {
-
-
             const clientID = "hidr36c0n1g74b3m1mrnfsvq1";
             const clientSecret = "15fbbujm5fme623e4d12k3ipqav8qkeot95vcij260e5vs4c5rh0";
             const cognitoDomain = "https://linkindex.auth.us-east-1.amazoncognito.com";
@@ -43,7 +43,6 @@ const QuickDexing = () => {
                 Authorization: basicAuthorization,
             };
 
-
             const data = new URLSearchParams();
             let token = "";
 
@@ -51,10 +50,6 @@ const QuickDexing = () => {
             data.append("client_id", "hidr36c0n1g74b3m1mrnfsvq1");
             data.append("code", code);
             data.append("redirect_uri", "https://collabchatbots.com");
-
-
-
-
             axios
                 .post(`${cognitoDomain}/oauth2/token`, data, { headers })
                 .then((res) => {
@@ -123,7 +118,7 @@ const QuickDexing = () => {
         }
 
         const formData = new FormData();
-        formData.append('user_id', 'your_user_id'); // Replace 'your_user_id' with actual user ID
+        formData.append('user_id', localStorage.getItem("email")); // Replace 'your_user_id' with actual user ID
         formData.append('site_url', website);
         formData.append('credentials_json_file', jsonFile);
 
@@ -146,7 +141,7 @@ const QuickDexing = () => {
 
             // Update submitted data list
             const newSubmission = {
-                user_id: email,
+                user_id: localStorage.getItem("email"),
                 website: website,
                 jsonFile: jsonFile,
             };
@@ -193,6 +188,23 @@ const QuickDexing = () => {
     const handleRemoveUrl = (urlToRemove) => {
         setUrls(prevUrls => prevUrls.filter(url => url !== urlToRemove));
     };
+    
+    const optionClick = (siteUrl) => {
+        const token = localStorage.getItem("accessToken");
+
+        fetch(`https://www.googleapis.com/webmasters/v3/sites/${siteUrl}/sitemaps`, {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            console.log(data);
+        })
+        .catch(e => console.log(e.message))
+    }
+
     return (
         <div className="h-full w-full flex flex-col items-center justify-center bg-[#27272b]">
             <div className='w-full h-full p-5 flex flex-col'>
@@ -208,14 +220,16 @@ const QuickDexing = () => {
                         </p>
                         <select 
                             type="text" 
-                            className='p-1 rounded-md text-black bg-[#E4E4E7] w-[75%]' 
+                            className='p-1 rounded-md text-black bg-[#E4E4E7] w-[75%] focus:ring-0 focus:outline-none' 
+                            onChange={(e) => optionClick(e.target.value)}
                         >
                             <option value="default" selected>Select a website</option>
-                            <option value="Option1">Option 1</option>
-                            <option value="Option2">Option 2</option>
+                            {sites.siteEntry && sites.siteEntry.map((site, index) => (
+                                <option value={site.siteUrl}>{site.siteUrl}</option>
+                            ))}
                         </select>
                     </div>
-                    <div className='relative flex items-center justify-between w-full my-4'>
+                    {/*<div className='relative flex items-center justify-between w-full my-4'>
                         <p className='text-white'>
                             Sitemap
                             <span className='text-red-600 ml-1'>*</span>
@@ -229,7 +243,7 @@ const QuickDexing = () => {
                             <option value="Option2">Option 2</option>
                         </select>
                         <p className='absolute -bottom-6 right-[25rem] text-gray-300 text-xs'>The sitemap containing the URLs you want to index</p>
-                    </div>
+                    </div>*/}
                     <div className='flex justify-center mb-4 mt-10 w-[50%]'>
                         <button className='rounded-md bg-blue-500 hover:bg-blue-600 p-2 text-sm text-black '>
                             Send to index
