@@ -36,10 +36,10 @@ const Sidebar = ({ isOpen, onToggle, onHeadingClick }) => {
         <LuWalletCards className='text-[#71717A] font-bold h-6 w-6'/>
         <p className='text-[#E4E4E7] text-md'>Websites</p>
       </div>
-      <div className='my-1 flex items-center gap-2 hover:bg-[#16161B] cursor-pointer px-1 py-2 rounded-md'>
+      {/* <div className='my-1 flex items-center gap-2 hover:bg-[#16161B] cursor-pointer px-1 py-2 rounded-md'>
         <IoFlashOutline className='text-[#71717A] font-bold h-6 w-6'/>
         <p className='text-[#E4E4E7] text-md'>Service Accounts</p>
-      </div>
+      </div> */}
       <div className='w-[200px] md:w-[300px]'>
         <p className='font-bold my-2 text-[#71717A]'>Tools</p>
         <div className='my-1 flex items-center gap-2 hover:bg-[#16161B] cursor-pointer px-1 py-2 rounded-md' onClick={() => onHeadingClick("Quick Dexing")}>
